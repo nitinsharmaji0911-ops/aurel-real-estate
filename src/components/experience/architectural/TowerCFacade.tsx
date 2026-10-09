@@ -15,6 +15,11 @@ interface TowerFacadeFloorProps {
   windowLitIntensity: number;
 }
 
+/**
+ * Tower C — The Solstice: Boutique Horizon Terraces
+ * Features floating cantilevered floor trays with champagne bronze fascia,
+ * continuous panoramic ribbon glass, recessed private terraces, and fluted bronze pilasters.
+ */
 export function TowerCFloor({
   floorNumber,
   width,
@@ -25,18 +30,21 @@ export function TowerCFloor({
   isPenthouse,
   windowLitIntensity,
 }: TowerFacadeFloorProps) {
-  const slabThickness = 0.12;
-  const glassHeight = floorHeight - slabThickness;
+  const slabThickness = 0.08;
+  const glassHeight = floorHeight - slabThickness - 0.06;
   const curWidth = width;
   const curDepth = depth;
 
-  const isLit = (floorNumber * 4 + 3) % 4 !== 0;
+  const isLit = (floorNumber * 5 + 2) % 4 !== 0;
+
+  // Mullion grid along the ribbon glazing
+  const frontMullionsX = [-curWidth * 0.36, -curWidth * 0.18, 0, curWidth * 0.18, curWidth * 0.36];
 
   return (
     <group position={[0, floorHeight / 2, 0]}>
-      {/* 1. EXTENDED FLOATING HORIZONTAL FLOOR TRAY (Slab projects past glass) */}
+      {/* 1. ELEGANT FLOATING FLOOR TRAY (Thin, knife-edge horizontal cantilever) */}
       <mesh position={[0, -floorHeight / 2 + slabThickness / 2, 0]}>
-        <boxGeometry args={[curWidth + 0.6, slabThickness, curDepth + 0.6]} />
+        <boxGeometry args={[curWidth + 0.45, slabThickness, curDepth + 0.45]} />
         <meshStandardMaterial
           color={
             isFloorSelected
@@ -52,18 +60,56 @@ export function TowerCFloor({
         />
       </mesh>
 
-      {/* Underside Soffit Panel */}
-      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.02, 0]}>
-        <boxGeometry args={[curWidth + 0.5, 0.04, curDepth + 0.5]} />
+      {/* Champagne Bronze Knife-Edge Fascia Trim on Slab Perimeter */}
+      <group position={[0, -floorHeight / 2 + slabThickness / 2, 0]}>
+        {/* Front & Back Fascia Trim */}
+        <mesh position={[0, 0, curDepth / 2 + 0.23]}>
+          <boxGeometry args={[curWidth + 0.46, slabThickness + 0.02, 0.03]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+        <mesh position={[0, 0, -curDepth / 2 - 0.23]}>
+          <boxGeometry args={[curWidth + 0.46, slabThickness + 0.02, 0.03]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+        {/* Sides Fascia Trim */}
+        <mesh position={[curWidth / 2 + 0.23, 0, 0]}>
+          <boxGeometry args={[0.03, slabThickness + 0.02, curDepth + 0.46]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+        <mesh position={[-curWidth / 2 - 0.23, 0, 0]}>
+          <boxGeometry args={[0.03, slabThickness + 0.02, curDepth + 0.46]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+      </group>
+
+      {/* Warm Timber/Stone Soffit on Cantilever Underside */}
+      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.015, 0]}>
+        <boxGeometry args={[curWidth + 0.38, 0.02, curDepth + 0.38]} />
         <meshStandardMaterial
-          color={ARCH_MATERIALS.limestone.color}
-          roughness={ARCH_MATERIALS.limestone.roughness}
+          color={ARCH_MATERIALS.timberSoffit.color}
+          roughness={ARCH_MATERIALS.timberSoffit.roughness}
         />
       </mesh>
 
-      {/* 2. RECESSED WRAPAROUND GLASS CURTAIN WALL */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[curWidth - 0.25, glassHeight, curDepth - 0.25]} />
+      {/* 2. RECESSED PANORAMIC RIBBON GLASS CORE */}
+      <mesh position={[0, 0.03, 0]}>
+        <boxGeometry args={[curWidth - 0.24, glassHeight, curDepth - 0.24]} />
         <meshStandardMaterial
           color={
             isFloorSelected
@@ -81,85 +127,89 @@ export function TowerCFloor({
               ? '#dfc285'
               : isLit
               ? ARCH_MATERIALS.curtainGlassLit.emissive
-              : '#05090f'
+              : '#04070c'
           }
           emissiveIntensity={
             isFloorSelected
               ? 0.75
               : isLit
               ? ARCH_MATERIALS.curtainGlassLit.emissiveIntensity * windowLitIntensity
-              : 0.05
+              : 0.04
           }
         />
       </mesh>
 
-      {/* 3. FLUTED CHAMPAGNE BRONZE ACCENT PANELS BETWEEN BAYS */}
-      {[-curWidth * 0.25, curWidth * 0.25].map((px, idx) => (
-        <group key={`fluted-${idx}`}>
-          <mesh position={[px, 0, curDepth / 2 + 0.02]}>
-            <boxGeometry args={[0.32, glassHeight, 0.12]} />
+      {/* 3. VERTICAL GRAPHITE MULLIONS (Crisp 1.5m Bay Spacing) */}
+      {frontMullionsX.map((mx, idx) => (
+        <group key={`c-mull-${idx}`}>
+          <mesh position={[mx, 0.03, curDepth / 2 - 0.1]}>
+            <boxGeometry args={[0.05, glassHeight, 0.06]} />
             <meshStandardMaterial
-              color={ARCH_MATERIALS.champagneBronze.color}
-              roughness={ARCH_MATERIALS.champagneBronze.roughness}
-              metalness={ARCH_MATERIALS.champagneBronze.metalness}
+              color={ARCH_MATERIALS.graphiteFrame.color}
+              roughness={ARCH_MATERIALS.graphiteFrame.roughness}
+              metalness={ARCH_MATERIALS.graphiteFrame.metalness}
             />
           </mesh>
-          <mesh position={[px, 0, -curDepth / 2 - 0.02]}>
-            <boxGeometry args={[0.32, glassHeight, 0.12]} />
+          <mesh position={[mx, 0.03, -curDepth / 2 + 0.1]}>
+            <boxGeometry args={[0.05, glassHeight, 0.06]} />
             <meshStandardMaterial
-              color={ARCH_MATERIALS.champagneBronze.color}
-              roughness={ARCH_MATERIALS.champagneBronze.roughness}
-              metalness={ARCH_MATERIALS.champagneBronze.metalness}
+              color={ARCH_MATERIALS.graphiteFrame.color}
+              roughness={ARCH_MATERIALS.graphiteFrame.roughness}
+              metalness={ARCH_MATERIALS.graphiteFrame.metalness}
             />
           </mesh>
         </group>
       ))}
 
-      {/* 4. WRAPAROUND BALCONY GLASS BALUSTRADE ON CANTILEVERED SLAB */}
-      {/* Front Balcony Railing */}
-      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.32, curDepth / 2 + 0.28]}>
-        <boxGeometry args={[curWidth * 0.72, 0.62, 0.04]} />
-        <meshStandardMaterial
-          color={ARCH_MATERIALS.balconyGlass.color}
-          roughness={ARCH_MATERIALS.balconyGlass.roughness}
-          transparent
-          opacity={ARCH_MATERIALS.balconyGlass.opacity}
-        />
-      </mesh>
-      {/* Bronze Top Rail */}
-      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.64, curDepth / 2 + 0.28]}>
-        <boxGeometry args={[curWidth * 0.72, 0.04, 0.08]} />
-        <meshStandardMaterial
-          color={ARCH_MATERIALS.champagneBronze.color}
-          roughness={0.3}
-          metalness={0.8}
-        />
-      </mesh>
-
-      {/* 5. SOLID LIMESTONE REAR SHEAR CORE CORNERS */}
-      {[
-        [-curWidth / 2 + 0.15, -curDepth / 2 + 0.15],
-        [curWidth / 2 - 0.15, -curDepth / 2 + 0.15],
-      ].map(([cx, cz], idx) => (
-        <mesh key={`core-${idx}`} position={[cx, 0, cz]}>
-          <boxGeometry args={[0.42, glassHeight, 0.42]} />
+      {/* 4. FLUTED CHAMPAGNE BRONZE VERTICAL ACCENT PILASTERS */}
+      {[-curWidth * 0.24, curWidth * 0.24].map((px, idx) => (
+        <mesh key={`fluted-${idx}`} position={[px, 0.03, curDepth / 2 - 0.02]} castShadow>
+          <boxGeometry args={[0.26, glassHeight, 0.14]} />
           <meshStandardMaterial
-            color={ARCH_MATERIALS.limestone.color}
-            roughness={ARCH_MATERIALS.limestone.roughness}
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
           />
         </mesh>
       ))}
 
-      {/* SELECTED FLOOR WARM LIGHT */}
-      {isFloorSelected && (
-        <pointLight
-          position={[0, 0, 0]}
-          color="#ffdfa4"
-          intensity={2.8}
-          distance={18}
-          decay={1.8}
-        />
-      )}
+      {/* 5. WRAPAROUND RECESSED TERRACE WITH SEAMLESS GLASS BALUSTRADE */}
+      <group position={[0, -floorHeight / 2 + slabThickness, curDepth / 2 + 0.2]}>
+        {/* Continuous Front Glass Balustrade */}
+        <mesh position={[0, 0.36, 0]}>
+          <boxGeometry args={[curWidth * 0.82, 0.70, 0.03]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.balconyGlass.color}
+            roughness={ARCH_MATERIALS.balconyGlass.roughness}
+            transparent
+            opacity={ARCH_MATERIALS.balconyGlass.opacity}
+          />
+        </mesh>
+        {/* Continuous Champagne Bronze Handrail Cap */}
+        <mesh position={[0, 0.72, 0]}>
+          <boxGeometry args={[curWidth * 0.82, 0.035, 0.06]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+      </group>
+
+      {/* 6. REAR SOLID LIMESTONE SHEAR WALLS */}
+      {[
+        [-curWidth / 2 + 0.18, -curDepth / 2 + 0.18],
+        [curWidth / 2 - 0.18, -curDepth / 2 + 0.18],
+      ].map(([sx, sz], idx) => (
+        <mesh key={`c-shear-${idx}`} position={[sx, 0.03, sz]} castShadow>
+          <boxGeometry args={[0.38, glassHeight, 0.38]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }

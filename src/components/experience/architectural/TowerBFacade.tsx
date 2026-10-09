@@ -15,6 +15,11 @@ interface TowerFacadeFloorProps {
   windowLitIntensity: number;
 }
 
+/**
+ * Tower B — The Horizon: Contemporary Terraced Architecture
+ * Features alternating staggered loggia balconies, deep window reveals,
+ * controlled horizontal limestone articulation, and upper setback sky gardens.
+ */
 export function TowerBFloor({
   floorNumber,
   width,
@@ -25,22 +30,30 @@ export function TowerBFloor({
   isPenthouse,
   windowLitIntensity,
 }: TowerFacadeFloorProps) {
-  const slabThickness = 0.12;
-  const glassHeight = floorHeight - slabThickness;
+  const slabThickness = 0.10;
+  const spandrelHeight = 0.28;
+  const visionGlassHeight = floorHeight - spandrelHeight;
 
-  // Setback on top terraced levels (floors 16-18)
+  // Progressive setback on upper terraced levels (floors 15-18)
   const setbackFactor = floorNumber >= 17 ? 0.88 : floorNumber >= 15 ? 0.94 : 1.0;
   const curWidth = width * setbackFactor;
   const curDepth = depth * setbackFactor;
 
-  const isLit = (floorNumber * 3 + 1) % 4 !== 0;
+  const isLit = (floorNumber * 4 + 1) % 4 !== 0;
   const isEvenFloor = floorNumber % 2 === 0;
+
+  // Mullion grid across the facade
+  const mullionsX = [-curWidth * 0.35, -curWidth * 0.12, curWidth * 0.12, curWidth * 0.35];
+
+  // Loggia position alternates: left on even floors, right on odd floors
+  const loggiaOffset = isEvenFloor ? -curWidth * 0.24 : curWidth * 0.24;
+  const loggiaWidth = curWidth * 0.44;
 
   return (
     <group position={[0, floorHeight / 2, 0]}>
-      {/* 1. SLIM HORIZONTAL SLAB */}
+      {/* 1. SLIM STRUCTURAL SLAB CORE */}
       <mesh position={[0, -floorHeight / 2 + slabThickness / 2, 0]}>
-        <boxGeometry args={[curWidth + 0.15, slabThickness, curDepth + 0.15]} />
+        <boxGeometry args={[curWidth - 0.02, slabThickness, curDepth - 0.02]} />
         <meshStandardMaterial
           color={
             isFloorSelected
@@ -56,19 +69,56 @@ export function TowerBFloor({
         />
       </mesh>
 
-      {/* 2. HORIZONTAL STONE SPANDREL BAND */}
-      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.14, 0]}>
-        <boxGeometry args={[curWidth - 0.05, 0.28, curDepth - 0.05]} />
+      {/* 2. RECESSED SHADOW REVEAL */}
+      <mesh position={[0, -floorHeight / 2 + slabThickness + 0.012, 0]}>
+        <boxGeometry args={[curWidth - 0.04, 0.025, curDepth - 0.04]} />
         <meshStandardMaterial
-          color={ARCH_MATERIALS.limestone.color}
-          roughness={ARCH_MATERIALS.limestone.roughness}
-          metalness={ARCH_MATERIALS.limestone.metalness}
+          color={ARCH_MATERIALS.slabShadowReveal.color}
+          roughness={ARCH_MATERIALS.slabShadowReveal.roughness}
         />
       </mesh>
 
-      {/* 3. RECESSED GLAZING CORE */}
-      <mesh position={[0, 0.14, 0]}>
-        <boxGeometry args={[curWidth - 0.2, glassHeight - 0.28, curDepth - 0.2]} />
+      {/* 3. HORIZONTAL LIMESTONE SPANDREL RIBBON (Controlled Horizontal Articulation) */}
+      <group position={[0, -floorHeight / 2 + spandrelHeight / 2, 0]}>
+        {/* Front & Back spandrels */}
+        <mesh position={[0, 0, curDepth / 2 - 0.04]}>
+          <boxGeometry args={[curWidth - 0.1, spandrelHeight, 0.08]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+        <mesh position={[0, 0, -curDepth / 2 + 0.04]}>
+          <boxGeometry args={[curWidth - 0.1, spandrelHeight, 0.08]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+        {/* Sides spandrels */}
+        <mesh position={[curWidth / 2 - 0.04, 0, 0]}>
+          <boxGeometry args={[0.08, spandrelHeight, curDepth - 0.1]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+        <mesh position={[-curWidth / 2 + 0.04, 0, 0]}>
+          <boxGeometry args={[0.08, spandrelHeight, curDepth - 0.1]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+      </group>
+
+      {/* 4. RECESSED GLAZED WALL CORE (Deep Window Reveals) */}
+      <mesh position={[0, spandrelHeight / 2, 0]}>
+        <boxGeometry args={[curWidth - 0.22, visionGlassHeight - 0.02, curDepth - 0.22]} />
         <meshStandardMaterial
           color={
             isFloorSelected
@@ -86,129 +136,115 @@ export function TowerBFloor({
               ? '#dfc285'
               : isLit
               ? ARCH_MATERIALS.curtainGlassLit.emissive
-              : '#05090f'
+              : '#04070c'
           }
           emissiveIntensity={
             isFloorSelected
               ? 0.75
               : isLit
               ? ARCH_MATERIALS.curtainGlassLit.emissiveIntensity * windowLitIntensity
-              : 0.05
+              : 0.04
           }
         />
       </mesh>
 
-      {/* 4. VERTICAL GRAPHITE MULLIONS */}
-      {[-curWidth * 0.36, -curWidth * 0.18, 0, curWidth * 0.18, curWidth * 0.36].map((mx, idx) => (
-        <group key={`mull-${idx}`}>
-          <mesh position={[mx, 0.14, curDepth / 2 - 0.08]}>
-            <boxGeometry args={[0.07, glassHeight - 0.28, 0.08]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.graphiteFrame.color}
-              roughness={ARCH_MATERIALS.graphiteFrame.roughness}
-              metalness={ARCH_MATERIALS.graphiteFrame.metalness}
-            />
-          </mesh>
-          <mesh position={[mx, 0.14, -curDepth / 2 + 0.08]}>
-            <boxGeometry args={[0.07, glassHeight - 0.28, 0.08]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.graphiteFrame.color}
-              roughness={ARCH_MATERIALS.graphiteFrame.roughness}
-              metalness={ARCH_MATERIALS.graphiteFrame.metalness}
-            />
-          </mesh>
-        </group>
+      {/* 5. VERTICAL LIMESTONE PIERS & GRAPHITE MULLIONS */}
+      {/* Front mullions */}
+      {mullionsX.map((mx, idx) => (
+        <mesh key={`b-mull-${idx}`} position={[mx, spandrelHeight / 2, curDepth / 2 - 0.06]}>
+          <boxGeometry args={[0.06, visionGlassHeight, 0.08]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.graphiteFrame.color}
+            roughness={ARCH_MATERIALS.graphiteFrame.roughness}
+            metalness={ARCH_MATERIALS.graphiteFrame.metalness}
+          />
+        </mesh>
       ))}
 
-      {/* 5. ALTERNATING STAGGERED BALCONIES */}
-      {isEvenFloor ? (
-        /* Even floor: Center Grand Balcony */
-        <group position={[0, -floorHeight / 2 + slabThickness / 2, curDepth / 2 + 0.6]}>
-          <mesh>
-            <boxGeometry args={[curWidth * 0.46, slabThickness, 1.2]} />
-            <meshStandardMaterial
-              color={isFloorSelected ? '#dfc285' : ARCH_MATERIALS.slabEdge.color}
-              roughness={0.5}
-            />
-          </mesh>
-          {/* Glass Railing */}
-          <mesh position={[0, 0.36, 0.58]}>
-            <boxGeometry args={[curWidth * 0.45, 0.62, 0.04]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.balconyGlass.color}
-              roughness={ARCH_MATERIALS.balconyGlass.roughness}
-              transparent
-              opacity={ARCH_MATERIALS.balconyGlass.opacity}
-            />
-          </mesh>
-          {/* Handrail */}
-          <mesh position={[0, 0.68, 0.58]}>
-            <boxGeometry args={[curWidth * 0.46, 0.04, 0.08]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.champagneBronze.color}
-              roughness={0.3}
-              metalness={0.8}
-            />
-          </mesh>
-        </group>
-      ) : (
-        /* Odd floor: Dual Flank Balconies */
-        <group>
-          {[-curWidth * 0.32, curWidth * 0.32].map((bx, idx) => (
-            <group key={`flank-${idx}`} position={[bx, -floorHeight / 2 + slabThickness / 2, curDepth / 2 + 0.55]}>
-              <mesh>
-                <boxGeometry args={[curWidth * 0.28, slabThickness, 1.1]} />
-                <meshStandardMaterial
-                  color={isFloorSelected ? '#dfc285' : ARCH_MATERIALS.slabEdge.color}
-                  roughness={0.5}
-                />
-              </mesh>
-              <mesh position={[0, 0.36, 0.53]}>
-                <boxGeometry args={[curWidth * 0.27, 0.62, 0.04]} />
-                <meshStandardMaterial
-                  color={ARCH_MATERIALS.balconyGlass.color}
-                  roughness={ARCH_MATERIALS.balconyGlass.roughness}
-                  transparent
-                  opacity={ARCH_MATERIALS.balconyGlass.opacity}
-                />
-              </mesh>
-              <mesh position={[0, 0.68, 0.53]}>
-                <boxGeometry args={[curWidth * 0.28, 0.04, 0.08]} />
-                <meshStandardMaterial
-                  color={ARCH_MATERIALS.champagneBronze.color}
-                  roughness={0.3}
-                  metalness={0.8}
-                />
-              </mesh>
-            </group>
-          ))}
-        </group>
-      )}
+      {/* Solid vertical piers at building corners */}
+      {[
+        [-curWidth / 2 + 0.16, curDepth / 2 - 0.16],
+        [curWidth / 2 - 0.16, curDepth / 2 - 0.16],
+        [-curWidth / 2 + 0.16, -curDepth / 2 + 0.16],
+        [curWidth / 2 - 0.16, -curDepth / 2 + 0.16],
+      ].map(([px, pz], idx) => (
+        <mesh key={`b-pier-${idx}`} position={[px, 0, pz]} castShadow>
+          <boxGeometry args={[0.34, floorHeight, 0.34]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.limestone.color}
+            roughness={ARCH_MATERIALS.limestone.roughness}
+            metalness={ARCH_MATERIALS.limestone.metalness}
+          />
+        </mesh>
+      ))}
 
-      {/* 6. UPPER LEVEL LANDSCAPED SKY PLANTERS (On setback floors) */}
+      {/* 6. ALTERNATING STAGGERED LOGGIA BALCONY */}
+      <group position={[loggiaOffset, -floorHeight / 2, curDepth / 2 + 0.4]}>
+        {/* Balcony Floor Slab */}
+        <mesh position={[0, slabThickness / 2, 0]}>
+          <boxGeometry args={[loggiaWidth, slabThickness, 0.85]} />
+          <meshStandardMaterial
+            color={isFloorSelected ? '#dfc285' : ARCH_MATERIALS.limestone.color}
+            roughness={0.6}
+          />
+        </mesh>
+        {/* Tinted Safety Glass Balustrade */}
+        <mesh position={[0, slabThickness + 0.38, 0.41]}>
+          <boxGeometry args={[loggiaWidth - 0.02, 0.72, 0.03]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.balconyGlass.color}
+            roughness={ARCH_MATERIALS.balconyGlass.roughness}
+            transparent
+            opacity={ARCH_MATERIALS.balconyGlass.opacity}
+          />
+        </mesh>
+        {/* Champagne Bronze Handrail */}
+        <mesh position={[0, slabThickness + 0.75, 0.41]}>
+          <boxGeometry args={[loggiaWidth, 0.035, 0.06]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+        {/* Side Glass Return */}
+        <mesh
+          position={[
+            isEvenFloor ? loggiaWidth / 2 - 0.015 : -loggiaWidth / 2 + 0.015,
+            slabThickness + 0.38,
+            0,
+          ]}
+        >
+          <boxGeometry args={[0.03, 0.72, 0.82]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.balconyGlass.color}
+            roughness={ARCH_MATERIALS.balconyGlass.roughness}
+            transparent
+            opacity={ARCH_MATERIALS.balconyGlass.opacity}
+          />
+        </mesh>
+      </group>
+
+      {/* 7. UPPER SETBACK SKY PLANTERS (Floors 15-18) */}
       {floorNumber >= 15 && (
-        <group position={[curWidth / 2 + 0.35, -floorHeight / 2 + slabThickness + 0.18, 0]}>
-          <mesh>
-            <boxGeometry args={[0.6, 0.35, curDepth * 0.6]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.limestone.color} roughness={0.6} />
+        <group position={[0, -floorHeight / 2 + 0.28, -curDepth / 2 - 0.35]}>
+          {/* Planter Box in Travertine */}
+          <mesh castShadow position={[0, 0, 0]}>
+            <boxGeometry args={[curWidth * 0.75, 0.45, 0.55]} />
+            <meshStandardMaterial
+              color={ARCH_MATERIALS.limestoneLight.color}
+              roughness={0.65}
+            />
           </mesh>
-          {/* Green Shrubbery */}
-          <mesh position={[0, 0.24, 0]}>
-            <boxGeometry args={[0.5, 0.2, curDepth * 0.55]} />
-            <meshStandardMaterial color="#2d4a34" roughness={0.7} />
+          {/* Lush Greenery in Planter */}
+          <mesh position={[0, 0.26, 0]}>
+            <boxGeometry args={[curWidth * 0.72, 0.18, 0.48]} />
+            <meshStandardMaterial
+              color={ARCH_MATERIALS.greenRoof.color}
+              roughness={0.8}
+            />
           </mesh>
         </group>
-      )}
-
-      {/* SELECTED FLOOR WARM LIGHT */}
-      {isFloorSelected && (
-        <pointLight
-          position={[0, 0, 0]}
-          color="#ffdfa4"
-          intensity={2.8}
-          distance={18}
-          decay={1.8}
-        />
       )}
     </group>
   );

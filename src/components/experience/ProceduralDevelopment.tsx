@@ -20,7 +20,7 @@ interface ProceduralDevelopmentProps {
   onSelectApartment: (apartment: Apartment) => void;
 }
 
-// 1. REALISTIC ANIMATED OCEAN WATER
+// 1. DYNAMIC OCEAN WATER WITH SPECULAR REFLECTION
 function DynamicWater({ timeOfDay }: { timeOfDay: TimeOfDay }) {
   const normalMap = useMemo(() => getProceduralWaterNormalTexture(), []);
   const atmosphere = ATMOSPHERES[timeOfDay];
@@ -48,7 +48,7 @@ function DynamicWater({ timeOfDay }: { timeOfDay: TimeOfDay }) {
   );
 }
 
-// 2. LUXURY SUPERYACHT (Refined Yacht Model)
+// 2. LUXURY SUPERYACHT (Streamlined Marine Craft)
 function LuxuryYacht({
   position,
   rotationY = 0,
@@ -72,12 +72,12 @@ function LuxuryYacht({
 
   return (
     <group ref={yachtRef} position={position} rotation={[0, rotationY, 0]} scale={[scale, scale, scale]}>
-      {/* Sleek Hull in Off-White Marine Gelcoat */}
+      {/* Sleek Hull in Marine Gelcoat */}
       <mesh position={[0, 0.45, 0]}>
         <boxGeometry args={[3.2, 0.8, 11]} />
         <meshStandardMaterial color="#f4f6f8" roughness={0.2} metalness={0.25} />
       </mesh>
-      {/* Bow */}
+      {/* Aerodynamic Bow */}
       <mesh position={[0, 0.45, 6]}>
         <coneGeometry args={[1.6, 2.2, 4]} />
         <meshStandardMaterial color="#f4f6f8" roughness={0.2} metalness={0.25} />
@@ -87,12 +87,12 @@ function LuxuryYacht({
         <boxGeometry args={[2.8, 0.12, 1.2]} />
         <meshStandardMaterial color="#6b4c2e" roughness={0.7} />
       </mesh>
-      {/* Cabin Deck */}
+      {/* Main Deck Cabin */}
       <mesh position={[0, 1.1, 0.5]}>
         <boxGeometry args={[2.5, 0.75, 6.8]} />
         <meshStandardMaterial color="#ffffff" roughness={0.25} />
       </mesh>
-      {/* Tinted Cabin Glazing */}
+      {/* Panoramic Glazing */}
       <mesh position={[0, 1.15, 0.5]}>
         <boxGeometry args={[2.55, 0.35, 6.4]} />
         <meshStandardMaterial
@@ -103,21 +103,16 @@ function LuxuryYacht({
           metalness={0.8}
         />
       </mesh>
-      {/* Flybridge Deck & Arch */}
+      {/* Flybridge Deck */}
       <mesh position={[0, 1.75, -0.4]}>
         <boxGeometry args={[2.1, 0.55, 4.2]} />
         <meshStandardMaterial color="#ffffff" roughness={0.25} />
-      </mesh>
-      {/* Teak Deck Inserts */}
-      <mesh position={[0, 0.86, 1.2]}>
-        <boxGeometry args={[2.2, 0.02, 4.0]} />
-        <meshStandardMaterial color="#7a5534" roughness={0.65} />
       </mesh>
     </group>
   );
 }
 
-// 3. ARCHITECTURAL STREETLAMP
+// 3. ARCHITECTURAL STREETLUMINAIRE
 function ArchitecturalStreetlamp({
   position,
   intensity = 1.0,
@@ -132,12 +127,12 @@ function ArchitecturalStreetlamp({
         <cylinderGeometry args={[0.06, 0.08, 4.4, 6]} />
         <meshStandardMaterial color="#22252c" roughness={0.45} metalness={0.7} />
       </mesh>
-      {/* Cantilevered Arm */}
+      {/* Cantilevered Bronze Arm */}
       <mesh position={[0.4, 4.3, 0]}>
         <boxGeometry args={[0.8, 0.06, 0.08]} />
         <meshStandardMaterial color="#9e845a" roughness={0.3} metalness={0.8} />
       </mesh>
-      {/* Glowing Luminaire Head */}
+      {/* Luminaire Head */}
       <mesh position={[0.8, 4.25, 0]}>
         <boxGeometry args={[0.3, 0.06, 0.18]} />
         <meshBasicMaterial color="#fff2d1" />
@@ -146,7 +141,7 @@ function ArchitecturalStreetlamp({
   );
 }
 
-// 4. ARCHITECTURAL TREES WITH REALISTIC CANOPIES
+// 4. HIGH-DETAIL ARCHITECTURAL TREES
 function ArchitecturalTree({
   position,
   type = 'cypress',
@@ -160,68 +155,68 @@ function ArchitecturalTree({
     <group position={position} scale={[scale, scale, scale]}>
       {/* Granite Planter Curb */}
       <mesh position={[0, 0.1, 0]} receiveShadow>
-        <cylinderGeometry args={[1.2, 1.3, 0.2, 12]} />
-        <meshStandardMaterial color="#9ea1a8" roughness={0.6} />
+        <cylinderGeometry args={[1.2, 1.3, 0.2, 14]} />
+        <meshStandardMaterial color={ARCH_MATERIALS.graniteCurb.color} roughness={0.65} />
       </mesh>
       {/* Mulch Soil */}
       <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[1.05, 1.05, 0.06, 12]} />
-        <meshStandardMaterial color="#2d2218" roughness={0.9} />
+        <cylinderGeometry args={[1.05, 1.05, 0.06, 14]} />
+        <meshStandardMaterial color="#2b2118" roughness={0.9} />
       </mesh>
 
-      {/* Trunk */}
+      {/* Textured Trunk */}
       <mesh position={[0, 1.4, 0]} castShadow>
-        <cylinderGeometry args={[0.16, 0.24, 2.8, 6]} />
-        <meshStandardMaterial color="#3d2f22" roughness={0.85} />
+        <cylinderGeometry args={[0.15, 0.22, 2.8, 8]} />
+        <meshStandardMaterial color="#3a2e22" roughness={0.85} />
       </mesh>
 
-      {/* Foliage Variations */}
+      {/* Layered Foliage Canopies */}
       {type === 'cypress' && (
-        <group position={[0, 2.4, 0]}>
+        <group position={[0, 2.2, 0]}>
           <mesh castShadow position={[0, 1.0, 0]}>
-            <coneGeometry args={[1.3, 2.6, 8]} />
-            <meshStandardMaterial color="#243d2b" roughness={0.75} />
+            <coneGeometry args={[1.2, 2.5, 9]} />
+            <meshStandardMaterial color="#213a27" roughness={0.75} />
           </mesh>
-          <mesh castShadow position={[0, 2.2, 0]}>
-            <coneGeometry args={[1.0, 2.2, 8]} />
-            <meshStandardMaterial color="#2c4a35" roughness={0.7} />
+          <mesh castShadow position={[0, 2.1, 0]}>
+            <coneGeometry args={[0.95, 2.1, 9]} />
+            <meshStandardMaterial color="#28442e" roughness={0.7} />
           </mesh>
-          <mesh castShadow position={[0, 3.2, 0]}>
-            <coneGeometry args={[0.65, 1.8, 7]} />
-            <meshStandardMaterial color="#385a42" roughness={0.65} />
+          <mesh castShadow position={[0, 3.1, 0]}>
+            <coneGeometry args={[0.62, 1.7, 8]} />
+            <meshStandardMaterial color="#325239" roughness={0.65} />
           </mesh>
         </group>
       )}
 
       {type === 'pine' && (
-        <group position={[0, 2.8, 0]}>
-          <mesh castShadow position={[0.3, 0, 0.1]}>
-            <cylinderGeometry args={[1.4, 1.6, 0.5, 8]} />
-            <meshStandardMaterial color="#2d4934" roughness={0.7} />
+        <group position={[0, 2.6, 0]}>
+          <mesh castShadow position={[0.2, 0, 0.1]}>
+            <cylinderGeometry args={[1.5, 1.7, 0.55, 8]} />
+            <meshStandardMaterial color="#26422d" roughness={0.7} />
           </mesh>
-          <mesh castShadow position={[-0.2, 0.9, -0.1]}>
-            <cylinderGeometry args={[1.1, 1.3, 0.45, 8]} />
-            <meshStandardMaterial color="#35573d" roughness={0.7} />
+          <mesh castShadow position={[-0.2, 0.8, -0.1]}>
+            <cylinderGeometry args={[1.2, 1.4, 0.5, 8]} />
+            <meshStandardMaterial color="#2f4e36" roughness={0.7} />
           </mesh>
-          <mesh castShadow position={[0.1, 1.7, 0]}>
-            <cylinderGeometry args={[0.8, 1.0, 0.4, 8]} />
-            <meshStandardMaterial color="#3d6347" roughness={0.65} />
+          <mesh castShadow position={[0.1, 1.6, 0]}>
+            <cylinderGeometry args={[0.85, 1.05, 0.45, 8]} />
+            <meshStandardMaterial color="#38593f" roughness={0.65} />
           </mesh>
         </group>
       )}
 
       {type === 'canopy' && (
-        <mesh castShadow position={[0, 3.4, 0]}>
-          <dodecahedronGeometry args={[1.8, 0]} />
-          <meshStandardMaterial color="#2b4731" roughness={0.75} />
+        <mesh castShadow position={[0, 3.3, 0]}>
+          <dodecahedronGeometry args={[1.75, 1]} />
+          <meshStandardMaterial color="#26402b" roughness={0.75} />
         </mesh>
       )}
     </group>
   );
 }
 
-// 5. LOW-RISE CONTEMPORARY SITE BUILDINGS (No Black Blocks)
-function SiteContextBuilding({
+// 5. ARTICULATED CONTEMPORARY LOW-RISE PODIUM BUILDING (No Featureless Blocks!)
+function ArchitecturalSiteBuilding({
   position,
   args,
   rotationY = 0,
@@ -232,50 +227,161 @@ function SiteContextBuilding({
   rotationY?: number;
   windowIntensity?: number;
 }) {
-  const floorCount = Math.floor(args[1] / 3.4);
+  const [bWidth, bHeight, bDepth] = args;
+  const floorHeight = 3.4;
+  const floorCount = Math.max(2, Math.floor(bHeight / floorHeight));
+  const baySpacing = 3.6;
+  const numBaysX = Math.max(2, Math.floor((bWidth - 1.2) / baySpacing));
+  const numBaysZ = Math.max(2, Math.floor((bDepth - 1.2) / baySpacing));
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Limestone Masonry Volume */}
-      <mesh castShadow receiveShadow position={[0, args[1] / 2, 0]}>
-        <boxGeometry args={args} />
-        <meshStandardMaterial
-          color={ARCH_MATERIALS.limestone.color}
-          roughness={ARCH_MATERIALS.limestone.roughness}
-        />
-      </mesh>
-
-      {/* Roof Parapet with Bronze Trim */}
-      <mesh position={[0, args[1] + 0.12, 0]}>
-        <boxGeometry args={[args[0] + 0.2, 0.24, args[2] + 0.2]} />
-        <meshStandardMaterial
-          color={ARCH_MATERIALS.champagneBronze.color}
-          roughness={0.35}
-          metalness={0.75}
-        />
-      </mesh>
-
-      {/* Rhythmic Floor-to-Ceiling Windows with Graphite Mullions */}
-      {Array.from({ length: floorCount }).map((_, fIdx) => (
-        <group key={`win-floor-${fIdx}`} position={[0, 1.8 + fIdx * 3.4, args[2] / 2 + 0.05]}>
-          {/* Glass Pane */}
-          <mesh>
-            <planeGeometry args={[args[0] * 0.82, 1.8]} />
+      {/* A. GROUND FLOOR DOUBLE-HEIGHT LOBBY / RETAIL VOLUME */}
+      <group position={[0, 1.7, 0]}>
+        {/* Recessed Ground Glazing */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[bWidth - 0.4, 3.2, bDepth - 0.4]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.curtainGlass.color}
+            roughness={0.1}
+            metalness={0.85}
+            transparent
+            opacity={0.85}
+            emissive="#ffe4b5"
+            emissiveIntensity={0.28 * windowIntensity}
+          />
+        </mesh>
+        {/* Exterior Limestone Colonnade */}
+        {[-bWidth / 2 + 0.3, bWidth / 2 - 0.3].map((cx, idx) => (
+          <mesh key={`col-g-${idx}`} position={[cx, 0, bDepth / 2 - 0.2]} castShadow>
+            <cylinderGeometry args={[0.26, 0.3, 3.4, 10]} />
             <meshStandardMaterial
-              color={ARCH_MATERIALS.curtainGlass.color}
-              emissive="#ffdca3"
-              emissiveIntensity={0.22 * windowIntensity}
-              roughness={0.12}
-              metalness={0.8}
+              color={ARCH_MATERIALS.limestone.color}
+              roughness={ARCH_MATERIALS.limestone.roughness}
             />
           </mesh>
-          {/* Thin Sills */}
-          <mesh position={[0, -0.92, 0.02]}>
-            <boxGeometry args={[args[0] * 0.84, 0.08, 0.1]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.graphiteFrame.color} />
-          </mesh>
-        </group>
-      ))}
+        ))}
+        {/* Entrance Portal Canopy in Champagne Bronze */}
+        <mesh position={[0, 1.6, bDepth / 2 + 0.6]} castShadow>
+          <boxGeometry args={[bWidth * 0.45, 0.18, 1.4]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+      </group>
+
+      {/* B. MID-RISE RESIDENTIAL / COMMERCIAL LEVELS */}
+      {Array.from({ length: floorCount - 1 }).map((_, fIdx) => {
+        const fY = 3.4 + fIdx * floorHeight + floorHeight / 2;
+        return (
+          <group key={`floor-${fIdx}`} position={[0, fY, 0]}>
+            {/* Floor Slab / Spandrel Ribbon in Warm French Limestone */}
+            <mesh position={[0, -floorHeight / 2 + 0.2, 0]}>
+              <boxGeometry args={[bWidth, 0.4, bDepth]} />
+              <meshStandardMaterial
+                color={ARCH_MATERIALS.limestone.color}
+                roughness={ARCH_MATERIALS.limestone.roughness}
+                metalness={ARCH_MATERIALS.limestone.metalness}
+              />
+            </mesh>
+
+            {/* Recessed Vision Glass Core */}
+            <mesh position={[0, 0.2, 0]}>
+              <boxGeometry args={[bWidth - 0.3, floorHeight - 0.45, bDepth - 0.3]} />
+              <meshStandardMaterial
+                color={ARCH_MATERIALS.curtainGlass.color}
+                roughness={0.12}
+                metalness={0.8}
+                transparent
+                opacity={0.85}
+                emissive="#ffdca3"
+                emissiveIntensity={0.18 * windowIntensity}
+              />
+            </mesh>
+
+            {/* Vertical Graphite Mullions across Front & Rear Facades */}
+            {Array.from({ length: numBaysX }).map((_, bIdx) => {
+              const bayX = -bWidth / 2 + 1.2 + bIdx * baySpacing;
+              return (
+                <group key={`mull-b-${bIdx}`}>
+                  <mesh position={[bayX, 0.2, bDepth / 2 - 0.1]}>
+                    <boxGeometry args={[0.08, floorHeight - 0.45, 0.12]} />
+                    <meshStandardMaterial
+                      color={ARCH_MATERIALS.graphiteFrame.color}
+                      roughness={ARCH_MATERIALS.graphiteFrame.roughness}
+                      metalness={ARCH_MATERIALS.graphiteFrame.metalness}
+                    />
+                  </mesh>
+                  <mesh position={[bayX, 0.2, -bDepth / 2 + 0.1]}>
+                    <boxGeometry args={[0.08, floorHeight - 0.45, 0.12]} />
+                    <meshStandardMaterial
+                      color={ARCH_MATERIALS.graphiteFrame.color}
+                      roughness={ARCH_MATERIALS.graphiteFrame.roughness}
+                      metalness={ARCH_MATERIALS.graphiteFrame.metalness}
+                    />
+                  </mesh>
+                </group>
+              );
+            })}
+
+            {/* Solid Structural Corner Piers */}
+            {[
+              [-bWidth / 2 + 0.2, bDepth / 2 - 0.2],
+              [bWidth / 2 - 0.2, bDepth / 2 - 0.2],
+              [-bWidth / 2 + 0.2, -bDepth / 2 + 0.2],
+              [bWidth / 2 - 0.2, -bDepth / 2 + 0.2],
+            ].map(([cx, cz], idx) => (
+              <mesh key={`col-corner-${idx}`} position={[cx, 0.2, cz]} castShadow>
+                <boxGeometry args={[0.42, floorHeight - 0.45, 0.42]} />
+                <meshStandardMaterial
+                  color={ARCH_MATERIALS.limestone.color}
+                  roughness={ARCH_MATERIALS.limestone.roughness}
+                />
+              </mesh>
+            ))}
+          </group>
+        );
+      })}
+
+      {/* C. ARTICULATED ROOF TERRACE & MECHANICAL PENTHOUSE (NO BLANK BLACK SLABS!) */}
+      <group position={[0, bHeight, 0]}>
+        {/* Light Stone Roof Paving Deck */}
+        <mesh position={[0, 0.08, 0]} receiveShadow>
+          <boxGeometry args={[bWidth - 0.2, 0.16, bDepth - 0.2]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.roofPaverLight.color}
+            roughness={ARCH_MATERIALS.roofPaverLight.roughness}
+          />
+        </mesh>
+
+        {/* Green Roof Sedum Planter Section */}
+        <mesh position={[bWidth * 0.12, 0.18, 0]}>
+          <boxGeometry args={[bWidth * 0.45, 0.08, bDepth * 0.55]} />
+          <meshStandardMaterial color={ARCH_MATERIALS.greenRoof.color} roughness={0.85} />
+        </mesh>
+
+        {/* Recessed Mechanical Penthouse with Louver Cladding */}
+        <mesh position={[-bWidth * 0.18, 0.9, 0]} castShadow>
+          <boxGeometry args={[bWidth * 0.38, 1.6, bDepth * 0.48]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.mechanicalLouver.color}
+            roughness={ARCH_MATERIALS.mechanicalLouver.roughness}
+            metalness={ARCH_MATERIALS.mechanicalLouver.metalness}
+          />
+        </mesh>
+
+        {/* Layered Parapet Coping with Champagne Bronze Trim */}
+        <mesh position={[0, 0.3, 0]}>
+          <boxGeometry args={[bWidth + 0.15, 0.35, bDepth + 0.15]} />
+          <meshStandardMaterial
+            color={ARCH_MATERIALS.champagneBronze.color}
+            roughness={ARCH_MATERIALS.champagneBronze.roughness}
+            metalness={ARCH_MATERIALS.champagneBronze.metalness}
+          />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -291,12 +397,13 @@ export function ProceduralDevelopment({
 }: ProceduralDevelopmentProps) {
   const atmosphere = ATMOSPHERES[timeOfDay];
 
+  // Refined tree distribution
   const trees = useMemo<
     Array<{ pos: [number, number, number]; type: 'cypress' | 'pine' | 'canopy'; s: number }>
   >(() => {
     return [
       { pos: [-8, 0, 8], type: 'cypress', s: 1.1 },
-      { pos: [-12, 0, 14], type: 'pine', s: 1.0 },
+      { pos: [-12, 0, 14], type: 'pine', s: 1.05 },
       { pos: [-4, 0, 16], type: 'cypress', s: 1.2 },
       { pos: [0, 0, 8], type: 'canopy', s: 1.0 },
       { pos: [6, 0, 14], type: 'cypress', s: 0.95 },
@@ -330,12 +437,22 @@ export function ProceduralDevelopment({
 
   return (
     <group>
-      {/* 1. MASTER GROUND SITE WITH GRANITE PAVING & EARTH */}
+      {/* 1. MASTER GROUND SITE WITH LIGHT WARM GRANITE & TRAVERTINE PLAZA (NO BLACK SLAB!) */}
+      {/* Primary Light Granite Base */}
       <mesh receiveShadow position={[0, -0.2, 0]}>
         <boxGeometry args={[145, 0.4, 145]} />
         <meshStandardMaterial
           color={ARCH_MATERIALS.granitePaving.color}
           roughness={ARCH_MATERIALS.granitePaving.roughness}
+        />
+      </mesh>
+
+      {/* Decorative French Limestone Plaza Banding */}
+      <mesh receiveShadow position={[2, 0.01, 4]}>
+        <boxGeometry args={[56, 0.04, 48]} />
+        <meshStandardMaterial
+          color={ARCH_MATERIALS.plazaTravertine.color}
+          roughness={ARCH_MATERIALS.plazaTravertine.roughness}
         />
       </mesh>
 
@@ -357,7 +474,7 @@ export function ProceduralDevelopment({
           <boxGeometry args={[1.4, 0.15, 138]} />
           <meshStandardMaterial color="#543c27" roughness={0.7} />
         </mesh>
-        {/* Bronze Safety Handrail */}
+        {/* Champagne Bronze Safety Handrail */}
         <mesh position={[14.8, 0.75, 0]}>
           <boxGeometry args={[0.06, 0.65, 138]} />
           <meshStandardMaterial
@@ -367,7 +484,7 @@ export function ProceduralDevelopment({
           />
         </mesh>
 
-        {/* Piers & Moored Yachts */}
+        {/* Piers & Moored Luxury Yachts */}
         {[
           { z: -38, yRot: 0.05, scale: 1.05 },
           { z: -14, yRot: -0.08, scale: 1.15 },
@@ -394,7 +511,7 @@ export function ProceduralDevelopment({
       </group>
 
       {/* 4. CENTRAL PODIUM PARK, WATER MIRROR & SUNKEN LAWN */}
-      {/* Landscaped Turf Pod */}
+      {/* Landscaped Turf Mound */}
       <mesh receiveShadow position={[2, 0.02, 2]}>
         <cylinderGeometry args={[23, 24, 0.16, 28]} />
         <meshStandardMaterial
@@ -412,7 +529,7 @@ export function ProceduralDevelopment({
         />
       </mesh>
 
-      {/* Central Water Mirror Pool */}
+      {/* Central Water Mirror Pool with Stepped Limestone Rim */}
       <mesh receiveShadow position={[2, 0.14, 0]}>
         <cylinderGeometry args={[8.5, 8.5, 0.16, 28]} />
         <meshStandardMaterial
@@ -421,7 +538,6 @@ export function ProceduralDevelopment({
           metalness={ARCH_MATERIALS.waterPool.metalness}
         />
       </mesh>
-      {/* Limestone Pool Coping Rim */}
       <mesh position={[2, 0.24, 0]}>
         <torusGeometry args={[8.5, 0.35, 8, 28]} />
         <meshStandardMaterial
@@ -491,9 +607,9 @@ export function ProceduralDevelopment({
         <meshStandardMaterial color={ARCH_MATERIALS.graniteCurb.color} roughness={0.65} />
       </mesh>
 
-      {/* Dashed Center Road Markings */}
+      {/* Center Dashed Road Markings */}
       {[-30, -15, 0, 15, 30].map((rx, idx) => (
-        <mesh key={idx} position={[rx, 0.07, 34]}>
+        <mesh key={`dash-${idx}`} position={[rx, 0.07, 34]}>
           <planeGeometry args={[4.0, 0.28]} />
           <meshStandardMaterial
             color={ARCH_MATERIALS.roadMarking.color}
@@ -504,7 +620,7 @@ export function ProceduralDevelopment({
 
       {/* Pedestrian Crosswalks */}
       {[-2, -1, 0, 1, 2].map((zi, idx) => (
-        <mesh key={idx} position={[-16, 0.07, 32.2 + zi * 0.9]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh key={`cross-${idx}`} position={[-16, 0.07, 32.2 + zi * 0.9]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[0.45, 2.6]} />
           <meshStandardMaterial color={ARCH_MATERIALS.roadMarking.color} roughness={0.6} />
         </mesh>
@@ -524,38 +640,38 @@ export function ProceduralDevelopment({
         <ArchitecturalTree key={idx} position={t.pos} type={t.type} scale={t.s} />
       ))}
 
-      {/* 9. CONTEMPORARY SITE CONTEXT BUILDINGS (Limestone, not black blocks) */}
-      <SiteContextBuilding
+      {/* 9. DETAILED CONTEMPORARY SITE BUILDINGS (No Featureless Blocks!) */}
+      <ArchitecturalSiteBuilding
         position={[-22, 0, 50]}
         args={[24, 16, 14]}
         rotationY={0.05}
         windowIntensity={atmosphere.windowLightIntensity}
       />
-      <SiteContextBuilding
+      <ArchitecturalSiteBuilding
         position={[14, 0, 52]}
         args={[28, 20, 16]}
         rotationY={-0.1}
         windowIntensity={atmosphere.windowLightIntensity}
       />
-      <SiteContextBuilding
+      <ArchitecturalSiteBuilding
         position={[46, 0, 38]}
         args={[20, 14, 20]}
         rotationY={0.2}
         windowIntensity={atmosphere.windowLightIntensity}
       />
-      <SiteContextBuilding
+      <ArchitecturalSiteBuilding
         position={[50, 0, -18]}
         args={[24, 24, 18]}
         rotationY={-0.15}
         windowIntensity={atmosphere.windowLightIntensity}
       />
-      <SiteContextBuilding
+      <ArchitecturalSiteBuilding
         position={[38, 0, -44]}
         args={[30, 18, 16]}
         rotationY={0.1}
         windowIntensity={atmosphere.windowLightIntensity}
       />
-      <SiteContextBuilding
+      <ArchitecturalSiteBuilding
         position={[-18, 0, -50]}
         args={[34, 22, 18]}
         rotationY={-0.08}
