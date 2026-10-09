@@ -5,10 +5,7 @@ import * as THREE from 'three';
 import { Tower, TowerId, Apartment } from '@/types/property';
 import { getApartmentsForFloor } from '@/data/apartments';
 import { TimeOfDay, ATMOSPHERES } from '@/lib/scene-config';
-import { ARCH_MATERIALS } from '@/lib/materials';
-import { TowerAFloor } from './architectural/TowerAFacade';
-import { TowerBFloor } from './architectural/TowerBFacade';
-import { TowerCFloor } from './architectural/TowerCFacade';
+import { JapaneseBuilding } from './architectural/JapaneseBuilding';
 
 interface BuildingTowerProps {
   tower: Tower;
@@ -44,7 +41,7 @@ function Unit3DMarker({
   return (
     <group
       position={position}
-      scale={hovered || isSelected ? [1.25, 1.25, 1.25] : [1, 1, 1]}
+      scale={hovered || isSelected ? [1.3, 1.3, 1.3] : [1, 1, 1]}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -59,7 +56,7 @@ function Unit3DMarker({
     >
       {/* Outer Floating Halo Ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.55, 0.06, 8, 16]} />
+        <torusGeometry args={[0.6, 0.07, 8, 20]} />
         <meshStandardMaterial
           color={isSelected ? '#ffffff' : hovered ? '#dfc285' : '#c5a059'}
           emissive={isSelected ? '#c5a059' : '#000000'}
@@ -69,13 +66,13 @@ function Unit3DMarker({
         />
       </mesh>
 
-      {/* Central Status Jewel Indicator */}
+      {/* Central Status Indicator Jewel */}
       <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[0.26, 12, 12]} />
+        <sphereGeometry args={[0.28, 14, 14]} />
         <meshStandardMaterial
           color={statusColor}
           emissive={statusColor}
-          emissiveIntensity={hovered || isSelected ? 1.5 : 0.8}
+          emissiveIntensity={hovered || isSelected ? 1.6 : 0.85}
           roughness={0.1}
         />
       </mesh>
@@ -83,6 +80,10 @@ function Unit3DMarker({
   );
 }
 
+/**
+ * BuildingTower — Renders the Real Architectural 3D Model (japanese_building__cc0)
+ * with interactive tower selection, vertical floor level highlighting, and 3D residence markers.
+ */
 export function BuildingTower({
   tower,
   isSelectedTower,
@@ -93,25 +94,29 @@ export function BuildingTower({
   onSelectFloor,
   onSelectApartment,
 }: BuildingTowerProps) {
-  const [hoveredFloor, setHoveredFloor] = useState<number | null>(null);
+  const [hovered, setHovered] = useState(false);
 
-  const atmosphere = ATMOSPHERES[timeOfDay];
-  const floorHeight = 1.85;
-  const lobbyHeight = 3.6;
-
-  // Tower Dimensions
-  const { width, depth } = useMemo(() => {
+  // Proportions and scale for each signature tower
+  const scale = useMemo<[number, number, number]>(() => {
     switch (tower.id) {
       case 'tower-a':
-        return { width: 14.0, depth: 10.8 };
+        // Flagship landmark skyscraper: 24 storeys
+        return [1.12, 1.72, 1.12];
       case 'tower-b':
-        return { width: 15.6, depth: 11.6 };
+        // Middle contemporary tower: 18 storeys
+        return [1.02, 1.34, 1.02];
       case 'tower-c':
-        return { width: 12.4, depth: 9.4 };
+        // The Solstice luxury residential tower: exact 14-storey proportions
+        return [0.88, 1.0, 0.88];
       default:
-        return { width: 13.5, depth: 10.5 };
+        return [1.0, 1.0, 1.0];
     }
   }, [tower.id]);
+
+  // Model physical dimensions at base scale: width 16.85m, height 34.78m, depth 16.5m
+  const modelWidth = 16.85 * scale[0];
+  const modelHeight = 34.78 * scale[1];
+  const modelDepth = 16.5 * scale[2];
 
   // Generate apartments for selected floor
   const currentFloorApartments = useMemo(() => {
@@ -126,386 +131,72 @@ export function BuildingTower({
     }
   };
 
+  // Calculate vertical height of selected floor
+  const selectedFloorY = useMemo(() => {
+    if (selectedFloorNumber === null) return null;
+    const startY = 2.6 * scale[1];
+    const usableHeight = modelHeight - 5.4 * scale[1];
+    const floorFraction = (selectedFloorNumber - 1) / Math.max(1, tower.floorsCount - 1);
+    return startY + floorFraction * usableHeight;
+  }, [selectedFloorNumber, scale, modelHeight, tower.floorsCount]);
+
   return (
     <group
       position={tower.position}
       rotation={[0, tower.rotationY, 0]}
       onClick={handleTowerClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+      }}
     >
-      {/* 1. ARTICULATED LUXURY GRAND ARRIVAL PODIUM & LOBBY */}
-      <group position={[0, lobbyHeight / 2, 0]}>
-        {/* Podium Base Volume in Honed Travertine with crisp reveals */}
-        <mesh castShadow receiveShadow position={[0, 0, -0.4]}>
-          <boxGeometry args={[width + 1.4, lobbyHeight, depth + 0.6]} />
-          <meshStandardMaterial
-            color={ARCH_MATERIALS.podiumStone.color}
-            roughness={ARCH_MATERIALS.podiumStone.roughness}
-            metalness={ARCH_MATERIALS.podiumStone.metalness}
-          />
-        </mesh>
+      {/* 1. REAL ARCHITECTURAL 3D BUILDING MODEL (japanese_building__cc0) */}
+      <JapaneseBuilding
+        position={[0, 0, 0]}
+        scale={scale}
+        isHovered={hovered && !isSelectedTower}
+        isSelected={isSelectedTower}
+      />
 
-        {/* Double-Height Glass Curtain Wall Grand Lobby Facade */}
-        <mesh position={[0, 0, (depth + 0.6) / 2 - 0.35]}>
-          <boxGeometry args={[width * 0.82, lobbyHeight - 0.4, 0.1]} />
-          <meshStandardMaterial
-            color={ARCH_MATERIALS.curtainGlass.color}
-            roughness={0.06}
-            metalness={0.85}
-            transparent
-            opacity={0.86}
-            emissive="#ffdca3"
-            emissiveIntensity={0.25 * atmosphere.windowLightIntensity}
-          />
-        </mesh>
-
-        {/* Interior Lobby Illuminated Travertine Feature Wall */}
-        <mesh position={[0, 0, (depth + 0.6) / 2 - 1.8]}>
-          <boxGeometry args={[width * 0.5, lobbyHeight - 0.8, 0.15]} />
-          <meshStandardMaterial
-            color={ARCH_MATERIALS.limestoneLight.color}
-            emissive="#ffedd5"
-            emissiveIntensity={0.3 * atmosphere.windowLightIntensity}
-            roughness={0.5}
-          />
-        </mesh>
-
-        {/* Monumental Colonnade Columns framing Lobby Entry */}
-        {[-width * 0.38, -width * 0.15, width * 0.15, width * 0.38].map((cx, idx) => (
-          <mesh key={`lobby-col-${idx}`} position={[cx, 0, (depth + 0.6) / 2 + 0.05]} castShadow>
-            <cylinderGeometry args={[0.22, 0.26, lobbyHeight, 12]} />
+      {/* 2. INTERACTIVE SELECTED FLOOR HIGHLIGHT BAND */}
+      {isSelectedTower && selectedFloorY !== null && (
+        <group position={[0, selectedFloorY, 0]}>
+          {/* Luminous Warm Amber Floor Highlight Slice */}
+          <mesh>
+            <boxGeometry args={[modelWidth + 0.35, 1.8 * scale[1], modelDepth + 0.35]} />
             <meshStandardMaterial
-              color={ARCH_MATERIALS.limestone.color}
-              roughness={ARCH_MATERIALS.limestone.roughness}
+              color="#dfc285"
+              emissive="#c5a059"
+              emissiveIntensity={0.85}
+              transparent
+              opacity={0.34}
+              roughness={0.2}
+              metalness={0.5}
             />
           </mesh>
-        ))}
 
-        {/* Sculptural Cantilevered Port-Cochère Canopy in Champagne Bronze */}
-        <group position={[0, 0.5, (depth + 0.6) / 2 + 1.8]}>
-          <mesh castShadow>
-            <boxGeometry args={[width * 0.68, 0.22, 3.4]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.champagneBronze.color}
-              roughness={ARCH_MATERIALS.champagneBronze.roughness}
-              metalness={ARCH_MATERIALS.champagneBronze.metalness}
-            />
+          {/* Upper & Lower Crisp Accent Lines */}
+          <mesh position={[0, (0.9 * scale[1]), 0]}>
+            <boxGeometry args={[modelWidth + 0.42, 0.06, modelDepth + 0.42]} />
+            <meshBasicMaterial color="#ffffff" />
           </mesh>
-          {/* Canopy Underside Timber Soffit with Warm Downlight Glow */}
-          <mesh position={[0, -0.12, 0]}>
-            <boxGeometry args={[width * 0.64, 0.02, 3.1]} />
-            <meshStandardMaterial
-              color="#ffe4b5"
-              emissive="#ffd699"
-              emissiveIntensity={0.55 * atmosphere.windowLightIntensity}
-              roughness={0.4}
-            />
+          <mesh position={[0, (-0.9 * scale[1]), 0]}>
+            <boxGeometry args={[modelWidth + 0.42, 0.06, modelDepth + 0.42]} />
+            <meshBasicMaterial color="#ffffff" />
           </mesh>
         </group>
+      )}
 
-        {/* Reflecting Pool Moat around Arrival Entry */}
-        <group position={[0, -lobbyHeight / 2 + 0.12, (depth + 0.6) / 2 + 1.8]}>
-          {/* Pool Water */}
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[width + 2.4, 0.16, 2.6]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.waterPool.color}
-              roughness={ARCH_MATERIALS.waterPool.roughness}
-              metalness={ARCH_MATERIALS.waterPool.metalness}
-            />
-          </mesh>
-          {/* Granite Stepping Entrance Bridge */}
-          <mesh position={[0, 0.12, 0]} receiveShadow>
-            <boxGeometry args={[width * 0.32, 0.1, 2.8]} />
-            <meshStandardMaterial
-              color={ARCH_MATERIALS.plazaTravertine.color}
-              roughness={0.6}
-            />
-          </mesh>
-        </group>
-
-        {/* Stepped Podium Greenery Planters */}
-        <group position={[-width / 2 - 0.4, -lobbyHeight / 2 + 0.4, 0]}>
-          <mesh castShadow position={[0, 0, 0]}>
-            <boxGeometry args={[0.7, 0.8, depth * 0.7]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.limestoneLight.color} roughness={0.65} />
-          </mesh>
-          <mesh position={[0, 0.45, 0]}>
-            <boxGeometry args={[0.6, 0.2, depth * 0.66]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.boxwoodHedge.color} roughness={0.8} />
-          </mesh>
-        </group>
-        <group position={[width / 2 + 0.4, -lobbyHeight / 2 + 0.4, 0]}>
-          <mesh castShadow position={[0, 0, 0]}>
-            <boxGeometry args={[0.7, 0.8, depth * 0.7]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.limestoneLight.color} roughness={0.65} />
-          </mesh>
-          <mesh position={[0, 0.45, 0]}>
-            <boxGeometry args={[0.6, 0.2, depth * 0.66]} />
-            <meshStandardMaterial color={ARCH_MATERIALS.boxwoodHedge.color} roughness={0.8} />
-          </mesh>
-        </group>
-      </group>
-
-      {/* 2. REFINED ARCHITECTURAL RESIDENTIAL FLOORS STACK */}
-      {Array.from({ length: tower.floorsCount }).map((_, idx) => {
-        const floorNumber = idx + 1;
-        const floorY = lobbyHeight + idx * floorHeight;
-        const isFloorSelected = isSelectedTower && selectedFloorNumber === floorNumber;
-        const isFloorHovered = isSelectedTower && hoveredFloor === floorNumber;
-        const isPenthouse = floorNumber >= tower.floorsCount - 2;
-
-        return (
-          <group
-            key={floorNumber}
-            position={[0, floorY, 0]}
-            onPointerOver={(e) => {
-              e.stopPropagation();
-              if (isSelectedTower) setHoveredFloor(floorNumber);
-            }}
-            onPointerOut={() => {
-              if (isSelectedTower) setHoveredFloor(null);
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!isSelectedTower) {
-                onSelectTower(tower.id);
-              } else {
-                onSelectFloor(tower.id, floorNumber);
-              }
-            }}
-          >
-            {/* Render distinct architectural facade per tower personality */}
-            {tower.id === 'tower-a' && (
-              <TowerAFloor
-                floorNumber={floorNumber}
-                width={width}
-                depth={depth}
-                floorHeight={floorHeight}
-                isFloorSelected={isFloorSelected}
-                isFloorHovered={isFloorHovered}
-                isPenthouse={isPenthouse}
-                windowLitIntensity={atmosphere.windowLightIntensity}
-              />
-            )}
-
-            {tower.id === 'tower-b' && (
-              <TowerBFloor
-                floorNumber={floorNumber}
-                width={width}
-                depth={depth}
-                floorHeight={floorHeight}
-                isFloorSelected={isFloorSelected}
-                isFloorHovered={isFloorHovered}
-                isPenthouse={isPenthouse}
-                windowLitIntensity={atmosphere.windowLightIntensity}
-              />
-            )}
-
-            {tower.id === 'tower-c' && (
-              <TowerCFloor
-                floorNumber={floorNumber}
-                width={width}
-                depth={depth}
-                floorHeight={floorHeight}
-                isFloorSelected={isFloorSelected}
-                isFloorHovered={isFloorHovered}
-                isPenthouse={isPenthouse}
-                windowLitIntensity={atmosphere.windowLightIntensity}
-              />
-            )}
-          </group>
-        );
-      })}
-
-      {/* 3. DETAILED ARCHITECTURAL ROOFTOPS (Light Pavers & Louvers, NO Dark Slabs) */}
-      <group position={[0, lobbyHeight + tower.floorsCount * floorHeight, 0]}>
-        {/* Tower A Crown: Layered Architectural Penthouse, Glass Pool, Spire & Louvers */}
-        {tower.id === 'tower-a' && (
-          <group>
-            {/* Light Travertine Roof Deck Pavers (No black surface!) */}
-            <mesh position={[0, 0.05, 0]} receiveShadow>
-              <boxGeometry args={[width * 0.88, 0.1, depth * 0.88]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.roofPaverLight.color}
-                roughness={ARCH_MATERIALS.roofPaverLight.roughness}
-              />
-            </mesh>
-
-            {/* Perimeter Sedum Green Roof Trays */}
-            <mesh position={[0, 0.12, 0]}>
-              <boxGeometry args={[width * 0.86, 0.06, depth * 0.86]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.greenRoof.color}
-                roughness={0.8}
-              />
-            </mesh>
-
-            {/* Mechanical Louver Screen in Satin Bronze & Graphite */}
-            <mesh position={[0, 1.1, -0.4]} castShadow>
-              <boxGeometry args={[width * 0.62, 2.0, depth * 0.58]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.mechanicalLouver.color}
-                roughness={ARCH_MATERIALS.mechanicalLouver.roughness}
-                metalness={ARCH_MATERIALS.mechanicalLouver.metalness}
-              />
-            </mesh>
-
-            {/* Bronze Cornice Cap above Louver Screen */}
-            <mesh position={[0, 2.15, -0.4]}>
-              <boxGeometry args={[width * 0.66, 0.16, depth * 0.62]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.champagneBronze.color}
-                roughness={ARCH_MATERIALS.champagneBronze.roughness}
-                metalness={ARCH_MATERIALS.champagneBronze.metalness}
-              />
-            </mesh>
-
-            {/* Glazed Penthouse Sky Observatory */}
-            <mesh position={[0, 0.9, depth * 0.18]}>
-              <boxGeometry args={[width * 0.52, 1.6, depth * 0.32]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.curtainGlass.color}
-                emissive="#ffdca3"
-                emissiveIntensity={0.45 * atmosphere.windowLightIntensity}
-                roughness={0.1}
-                metalness={0.85}
-              />
-            </mesh>
-
-            {/* Cantilevered Glass Dipping Pool */}
-            <group position={[0, 0.45, depth * 0.44 + 0.8]}>
-              <mesh position={[0, -0.15, 0]}>
-                <boxGeometry args={[width * 0.44, 0.3, 1.8]} />
-                <meshStandardMaterial color={ARCH_MATERIALS.slabEdge.color} roughness={0.5} />
-              </mesh>
-              <mesh position={[0, 0.08, 0]}>
-                <boxGeometry args={[width * 0.40, 0.12, 1.6]} />
-                <meshStandardMaterial
-                  color="#00e5ff"
-                  emissive="#00b4d8"
-                  emissiveIntensity={0.85}
-                  roughness={0.1}
-                />
-              </mesh>
-            </group>
-
-            {/* Sculptural Architectural Spire with Aviation Beacon */}
-            <group position={[0, 2.25, -0.4]}>
-              <mesh castShadow position={[0, 1.6, 0]}>
-                <cylinderGeometry args={[0.06, 0.38, 3.2, 12]} />
-                <meshStandardMaterial
-                  color={ARCH_MATERIALS.champagneBronze.color}
-                  roughness={0.2}
-                  metalness={0.85}
-                />
-              </mesh>
-              <mesh position={[0, 3.2, 0]}>
-                <sphereGeometry args={[0.12, 8, 8]} />
-                <meshBasicMaterial color="#ff3333" />
-              </mesh>
-            </group>
-          </group>
-        )}
-
-        {/* Tower B Crown: Terraced Aerofoil Canopy & Sky Garden */}
-        {tower.id === 'tower-b' && (
-          <group>
-            {/* Light Stone Roof Surface */}
-            <mesh position={[0, 0.05, 0]} receiveShadow>
-              <boxGeometry args={[width * 0.86, 0.1, depth * 0.86]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.roofPaverLight.color}
-                roughness={ARCH_MATERIALS.roofPaverLight.roughness}
-              />
-            </mesh>
-
-            {/* Mechanical Louver Enclosure */}
-            <mesh position={[0, 0.9, -0.3]} castShadow>
-              <boxGeometry args={[width * 0.65, 1.7, depth * 0.6]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.mechanicalLouver.color}
-                roughness={ARCH_MATERIALS.mechanicalLouver.roughness}
-                metalness={ARCH_MATERIALS.mechanicalLouver.metalness}
-              />
-            </mesh>
-
-            {/* Sweeping Aerodynamic Champagne Bronze Canopy */}
-            <mesh position={[0.3, 1.95, -0.1]} castShadow>
-              <boxGeometry args={[width * 0.88, 0.18, depth * 0.88]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.champagneBronze.color}
-                roughness={ARCH_MATERIALS.champagneBronze.roughness}
-                metalness={ARCH_MATERIALS.champagneBronze.metalness}
-              />
-            </mesh>
-
-            {/* Rooftop Sky Garden Lounge */}
-            <mesh position={[0, 0.2, depth * 0.28]}>
-              <boxGeometry args={[width * 0.55, 0.2, 1.4]} />
-              <meshStandardMaterial color={ARCH_MATERIALS.greenRoof.color} roughness={0.85} />
-            </mesh>
-          </group>
-        )}
-
-        {/* Tower C Crown: Open Bronze Pergola & Sunset Terrace */}
-        {tower.id === 'tower-c' && (
-          <group>
-            {/* Light Travertine Terrace Floor */}
-            <mesh position={[0, 0.05, 0]} receiveShadow>
-              <boxGeometry args={[width * 0.9, 0.1, depth * 0.9]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.plazaTravertine.color}
-                roughness={ARCH_MATERIALS.plazaTravertine.roughness}
-              />
-            </mesh>
-
-            {/* Elevator & Stair Core in Honed French Limestone */}
-            <mesh position={[-curWidthDepthOffset(width), 0.75, -curWidthDepthOffset(depth)]} castShadow>
-              <boxGeometry args={[width * 0.42, 1.4, depth * 0.42]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.limestone.color}
-                roughness={ARCH_MATERIALS.limestone.roughness}
-              />
-            </mesh>
-
-            {/* Open Bronze Pergola Trellis */}
-            {[-2.2, -1.1, 0, 1.1, 2.2].map((px, idx) => (
-              <mesh key={`c-beam-${idx}`} position={[px, 1.4, 0.2]}>
-                <boxGeometry args={[0.08, 0.16, depth * 0.68]} />
-                <meshStandardMaterial
-                  color={ARCH_MATERIALS.champagneBronze.color}
-                  roughness={0.3}
-                  metalness={0.8}
-                />
-              </mesh>
-            ))}
-
-            {/* Glass Windbreak Balustrade around Roof Terrace */}
-            <mesh position={[0, 0.45, depth * 0.44]}>
-              <boxGeometry args={[width * 0.86, 0.8, 0.03]} />
-              <meshStandardMaterial
-                color={ARCH_MATERIALS.balconyGlass.color}
-                transparent
-                opacity={ARCH_MATERIALS.balconyGlass.opacity}
-              />
-            </mesh>
-          </group>
-        )}
-      </group>
-
-      {/* 4. 3D APARTMENT UNIT SELECTOR MARKERS */}
-      {isSelectedTower && selectedFloorNumber !== null && currentFloorApartments.length > 0 && (
-        <group
-          position={[
-            0,
-            lobbyHeight + (selectedFloorNumber - 1) * floorHeight + floorHeight / 2,
-            0,
-          ]}
-        >
+      {/* 3. INTERACTIVE 3D APARTMENT RESIDENCE MARKERS ON SELECTED FLOOR */}
+      {isSelectedTower && selectedFloorY !== null && currentFloorApartments.length > 0 && (
+        <group position={[0, selectedFloorY, 0]}>
           {currentFloorApartments.map((apt, aptIdx) => {
             const total = currentFloorApartments.length;
             const angle = (aptIdx / total) * Math.PI * 2;
-            const markerRadius = Math.max(width, depth) * 0.65 + 1.8;
+            const markerRadius = Math.max(modelWidth, modelDepth) * 0.58 + 2.0;
             const mX = Math.cos(angle) * markerRadius;
             const mZ = Math.sin(angle) * markerRadius;
             const isSelected = selectedApartmentId === apt.id;
@@ -514,7 +205,7 @@ export function BuildingTower({
               <Unit3DMarker
                 key={apt.id}
                 apartment={apt}
-                position={[mX, 0.2, mZ]}
+                position={[mX, 0, mZ]}
                 isSelected={isSelected}
                 onSelect={() => onSelectApartment(apt)}
               />
@@ -522,10 +213,31 @@ export function BuildingTower({
           })}
         </group>
       )}
+
+      {/* 4. INVISIBLE RAYCAST HIT VOLUMES FOR FLOOR SELECTION ON MODEL */}
+      {isSelectedTower &&
+        Array.from({ length: tower.floorsCount }).map((_, idx) => {
+          const floorNum = idx + 1;
+          const startY = 2.6 * scale[1];
+          const usableHeight = modelHeight - 5.4 * scale[1];
+          const floorY = startY + ((floorNum - 1) / Math.max(1, tower.floorsCount - 1)) * usableHeight;
+          const bandHeight = usableHeight / tower.floorsCount;
+
+          return (
+            <mesh
+              key={`hit-floor-${floorNum}`}
+              position={[0, floorY, 0]}
+              visible={false}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectFloor(tower.id, floorNum);
+              }}
+            >
+              <boxGeometry args={[modelWidth + 1.0, bandHeight, modelDepth + 1.0]} />
+              <meshBasicMaterial transparent opacity={0} />
+            </mesh>
+          );
+        })}
     </group>
   );
-}
-
-function curWidthDepthOffset(dim: number): number {
-  return dim * 0.18;
 }
