@@ -9,6 +9,7 @@ import { BuildingTower } from './BuildingTower';
 import { getProceduralWaterNormalTexture } from '@/lib/water-texture';
 import { TimeOfDay, ATMOSPHERES } from '@/lib/scene-config';
 import { ARCH_MATERIALS } from '@/lib/materials';
+import { JapaneseBuilding } from './architectural/JapaneseBuilding';
 
 interface ProceduralDevelopmentProps {
   selectedTowerId: TowerId | null;
@@ -640,25 +641,25 @@ export function ProceduralDevelopment({
         <ArchitecturalTree key={idx} position={t.pos} type={t.type} scale={t.s} />
       ))}
 
-      {/* 9. DETAILED CONTEMPORARY SITE BUILDINGS (No Featureless Blocks!) */}
-      <ArchitecturalSiteBuilding
-        position={[-22, 0, 50]}
-        args={[24, 16, 14]}
-        rotationY={0.05}
-        windowIntensity={atmosphere.windowLightIntensity}
+      {/* 9. REAL ARCHITECTURAL 3D MODELS (japanese_building__cc0) & CONTEMPORARY SITE BUILDINGS */}
+      {/* Prominent Foreground Real Japanese Architectural Models */}
+      <JapaneseBuilding
+        position={[14, 0, 50]}
+        rotationY={-0.12}
+        scale={0.92}
       />
-      <ArchitecturalSiteBuilding
-        position={[14, 0, 52]}
-        args={[28, 20, 16]}
-        rotationY={-0.1}
-        windowIntensity={atmosphere.windowLightIntensity}
+      <JapaneseBuilding
+        position={[-22, 0, 48]}
+        rotationY={0.08}
+        scale={0.88}
       />
-      <ArchitecturalSiteBuilding
-        position={[46, 0, 38]}
-        args={[20, 14, 20]}
+      <JapaneseBuilding
+        position={[46, 0, 36]}
         rotationY={0.2}
-        windowIntensity={atmosphere.windowLightIntensity}
+        scale={0.82}
       />
+
+      {/* Surrounding Context Buildings */}
       <ArchitecturalSiteBuilding
         position={[50, 0, -18]}
         args={[24, 24, 18]}
